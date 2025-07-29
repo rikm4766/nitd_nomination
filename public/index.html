@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nomination Form</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+ 
+  <div class="svg-wrapper">
+    <img src="nitdlogo.svg" class="svg-logo-left" alt="Top Left Logo">
+    <!-- <img src="image.png" class="svg-decor-right" alt="Top Right Decoration"> -->
+  </div>
+
+  <div id="collegeHeader">
+    <h1>NATIONAL INSTITUTE OF TECHNOLOGY DURGAPUR</h1>
+    <h2>Distinguished Alumni Award 2025</h2>
+  </div>
+
+
+  <div class="form-container">
+    <h1>Nomination Form</h1>
+    <form id="nominationForm" enctype="multipart/form-data">
+      <h3>Nominator Details</h3>
+      <label for="nominator_name">Name:</label>
+      <input type="text" name="nominator_name" required />
+
+      <label for="nominator_affiliation">Affiliation:</label>
+      <input type="text" name="nominator_affiliation" required />
+
+      <label for="nominator_address">Postal Address:</label>
+      <textarea name="nominator_address" rows="2" required></textarea>
+
+      <label for="nominator_email">Email:</label>
+      <input type="email" name="nominator_email" required />
+
+      <label for="nominator_mobile">Mobile Number:</label>
+      <input type="tel" name="nominator_mobile" required />
+
+      <h3>Nomination Category</h3>
+      <label for="category">Select Category:</label>
+      <select name="category" required>
+        <option value="">-- Select Category --</option>
+        <option value="Academic Excellence">Academic Excellence</option>
+        <option value="Innovation/Research">Innovation/Research</option>
+        <option value="Leadership">Leadership</option>
+        <option value="Entrepreneurship">Entrepreneurship</option>
+      </select>
+
+      <h3>Nominee Details</h3>
+      <label for="nominee_name">Full Name:</label>
+      <input type="text" name="nominee_name" required />
+
+      <label for="nominee_father">Father's Name:</label>
+      <input type="text" name="nominee_father" required />
+
+      <label for="nominee_degree">Degree:</label>
+      <input type="text" name="nominee_degree" required />
+
+      <label for="nominee_branch">Branch:</label>
+      <input type="text" name="nominee_branch" required />
+
+      <label for="nominee_year">Graduation Year:</label>
+      <input type="number" name="nominee_year" required />
+
+      <label for="nominee_qualifications">Qualifications:</label>
+      <textarea name="nominee_qualifications" rows="2"></textarea>
+
+      <label for="nominee_present_position">Present Position:</label>
+      <textarea name="nominee_present_position" rows="2"></textarea>
+
+      <label for="nominee_past_positions">Past Positions:</label>
+      <textarea name="nominee_past_positions" rows="2"></textarea>
+
+      <label for="nominee_address">Postal Address:</label>
+      <textarea name="nominee_address" rows="2" required></textarea>
+
+      <label for="nominee_email">Email:</label>
+      <input type="email" name="nominee_email" required />
+
+      <label for="nominee_mobile">Mobile Number:</label>
+      <input type="tel" name="nominee_mobile" required />
+
+      <label for="nominee_linkedin">LinkedIn Profile:</label>
+      <input type="url" name="nominee_linkedin" />
+
+      <label for="nominee_other_info">Other Links/Info (GitHub, Portfolio, etc.):</label>
+      <textarea name="nominee_other_info" rows="2"></textarea>
+
+      <h3>Assessment</h3>
+
+      <label for="assessment_note">Brief Note on Nominee's Achievements:</label>
+            <ul class="assessment_details">
+              <li class="assessment_details">Please give specifics of work done by the candidate towards achieving excellence in whatever field the
+              candidate has worked in as his profession/social assignment</li>
+              <li class="assessment_details">Please give specifics of achievements of the candidate in his profession/social responsibilities</li>
+              <li class="assessment_details">Please name official awards/ recognitions given to the candidate, if any by recognized organisations for
+                  his professional/social work done.</li>
+            </ul>
+            <br>
+      <textarea name="assessment_note" rows="4" required></textarea>
+
+      <h3>Upload CV</h3>
+
+      <label for="cv">Upload CV (PDF only):</label>
+
+      <input type="file" name="cv" accept=".pdf" required />
+      <div class="submit_button">
+        <button type="submit">Submit Nomination</button>
+
+      </div>
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

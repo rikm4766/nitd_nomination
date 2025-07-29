@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    input, button { padding: 5px; margin: 5px 0; }
+    #loginBox { margin-bottom: 30px; }
+    #logoutBtn { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div id="loginBox">
+    <h2>Admin Login</h2>
+    <input type="text" id="adminName" placeholder="Enter admin name" autocomplete="username" />
+    <input type="password" id="adminPass" placeholder="Enter password" autocomplete="current-password" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="nominations" style="display:none;">
+    <h2>All Nominations</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nominator</th>
+          <th>Nominee</th>
+          <th>Category</th>
+          <th>Download CV</th>
+          <th>Download Filled PDF</th>
+        </tr>
+      </thead>
+      <tbody id="nominationList"></tbody>
+    </table>
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    function login() {
+      const name = document.getElementById('adminName').value;
+      const pass = document.getElementById('adminPass').value;
+
+      fetch('/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, password: pass })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('loginBox').style.display = 'none';
+          document.getElementById('nominations').style.display = 'block';
+          loadNominations();
+        } else {
+          alert('Invalid login');
+        }
+      });
+    }
+
+    function loadNominations() {
+      fetch('/admin/nominations')
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('nominationList');
+          tbody.innerHTML = '';
+          data.forEach(n => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${n._id}</td>
+              <td>${n.nominator_name}</td>
+              <td>${n.nominee_name}</td>
+              <td>${n.category}</td>
+              <td><a href="/admin/download/${n._id}" target="_blank">Download CV</a></td>
+              <td><a href="/admin/finalpdf/${n._id}" target="_blank">Download Filled PDF</a></td>
+            `;
+            tbody.appendChild(row);
+          });
+        });
+    }
+
+    function logout() {
+      window.location.reload();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('adminPass').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') login();
+      });
+      document.getElementById('adminName').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') login();
+      });
+    });
+  </script>
+</body>
+</html>
