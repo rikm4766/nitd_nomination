@@ -1,6 +1,5 @@
 /node_modules
 /public/image.png
 /package-lock.json
-/package.json
 password_remover.js
 .env
