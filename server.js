@@ -108,15 +108,6 @@ function requireAdminAuth(req, res, next) {
 }
 
 
-async function createDefaultAdmin() {
-  const existing = await Admin.findOne({ username: 'ssr' });
-  if (!existing) {
-    const hash = await bcrypt.hash('ssr', 10); 
-    const admin = new Admin({ username: 'ssr', passwordHash: hash });
-    await admin.save();
-   
-  }
-}
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'form.html'));
