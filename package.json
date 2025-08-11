@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@azure/storage-blob": "^12.28.0",
     "bcrypt": "^6.0.0",
     "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
@@ -9,5 +10,15 @@
     "mongoose": "^8.16.5",
     "multer": "^2.0.2",
     "pdf-lib": "^1.17.1"
-  }
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "nitd_nomination",
+  "version": "1.0.0",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

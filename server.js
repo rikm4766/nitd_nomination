@@ -13,17 +13,32 @@ const MongoStore = require('connect-mongo');
 const bcrypt = require('bcrypt');
 const { PDFDocument } = require('pdf-lib');
 const { readFile } = require('fs/promises');
+const { BlobServiceClient } = require('@azure/storage-blob');
 
 const app = express();
 
 const PORT = process.env.PORT ;
 const MONGO_URI = process.env.MONGO_URI;
 const SESSION_SECRET = process.env.SESSION_SECRET;
+const AZURE_STORAGE_ACCOUNT_NAME = process.env.VITE_AZURE_STORAGE_ACCOUNT_NAME;
+const AZURE_STORAGE_ACCOUNT_KEY = process.env.VITE_AZURE_STORAGE_ACCOUNT_KEY;
+const AZURE_STORAGE_CONTAINER_NAME = process.env.VITE_AZURE_STORAGE_CONTAINER_NAME;
 
 if (!MONGO_URI || !SESSION_SECRET) {
   console.error('FATAL ERROR: MONGO_URI and SESSION_SECRET must be set in .env file');
   process.exit(1);
 }
+
+if (!AZURE_STORAGE_ACCOUNT_NAME || !AZURE_STORAGE_ACCOUNT_KEY || !AZURE_STORAGE_CONTAINER_NAME) {
+  console.error('FATAL ERROR: Azure Storage configuration must be set in .env file');
+  process.exit(1);
+}
+
+// Azure Blob Storage configuration
+const blobServiceClient = BlobServiceClient.fromConnectionString(
+  `DefaultEndpointsProtocol=https;AccountName=${AZURE_STORAGE_ACCOUNT_NAME};AccountKey=${AZURE_STORAGE_ACCOUNT_KEY};EndpointSuffix=core.windows.net`
+);
+const containerClient = blobServiceClient.getContainerClient(AZURE_STORAGE_CONTAINER_NAME);
 
 
 app.use(cors());
@@ -32,17 +47,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-
+// Keep uploads directory for template files
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.floor(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Use memory storage for multer since we'll upload to Azure
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 
@@ -117,7 +127,18 @@ app.get('/', (req, res) => {
 app.post('/submit', upload.single('cv'), async (req, res) => {
   try {
     const data = req.body;
-    const cvPath = req.file ? `/uploads/${req.file.filename}` : null;
+    let cvPath = null;
+
+    // Upload CV to Azure Blob Storage if file is provided
+    if (req.file) {
+      const uniqueSuffix = Date.now() + '-' + Math.floor(Math.random() * 1e9);
+      const fileName = `cv-${uniqueSuffix}${path.extname(req.file.originalname)}`;
+      
+      const blockBlobClient = containerClient.getBlockBlobClient(fileName);
+      await blockBlobClient.upload(req.file.buffer, req.file.buffer.length);
+      
+      cvPath = fileName; // Store just the filename, not the full path
+    }
 
     const nomination = new Nomination({
       ...data,
@@ -177,8 +198,23 @@ app.get('/admin/download/:id', requireAdminAuth, async (req, res) => {
     const record = await Nomination.findById(req.params.id);
     if (!record || !record.cv_path) return res.status(404).send('CV not found');
 
-    const absPath = path.join(__dirname, record.cv_path);
-    res.download(absPath);
+    // Download from Azure Blob Storage
+    const blockBlobClient = containerClient.getBlockBlobClient(record.cv_path);
+    
+    try {
+      const downloadBlockBlobResponse = await blockBlobClient.download();
+      const stream = downloadBlockBlobResponse.readableStreamBody;
+      
+      res.set({
+        'Content-Type': downloadBlockBlobResponse.contentType || 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${record.cv_path}"`
+      });
+      
+      stream.pipe(res);
+    } catch (azureError) {
+      console.error('Azure download error:', azureError);
+      res.status(404).send('File not found in Azure storage');
+    }
   } catch (err) {
     console.error('CV download error:', err);
     res.status(404).send('Download error');
